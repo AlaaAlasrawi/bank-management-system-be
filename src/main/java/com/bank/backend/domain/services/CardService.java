@@ -2,6 +2,7 @@ package com.bank.backend.domain.services;
 
 import com.bank.backend.domain.enums.CardStatus;
 import com.bank.backend.domain.enums.CardType;
+import com.bank.backend.domain.model.BankAccount;
 import com.bank.backend.domain.model.Card;
 import com.bank.backend.domain.model.SysUser;
 import com.bank.backend.domain.providers.IdentityProvider;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -27,6 +29,9 @@ public class CardService {
         SysUser user = identityProvider.currentIdentity();
         Long bankAccountId = bankAccountRepository.getByUserId(user.getId()).getId();
 
+        if(Objects.isNull(card.getCardType())){
+            throw new IllegalArgumentException("Card type is required");
+        }
        List<Card> cards = cardRepository.findByBankAccountId(bankAccountId);
         AtomicReference<Boolean> creditTypeFlag = new AtomicReference<>(false);
         AtomicReference<Boolean> debitTypeFlag = new AtomicReference<>(false);
@@ -88,6 +93,8 @@ public class CardService {
     }
 
     public List<Card> getAllCards() {
-        return cardRepository.getAllCards();
+        BankAccount bankAccount = bankAccountRepository.getByUserId(identityProvider.currentIdentity().getId());
+
+        return cardRepository.getAllCardsByBankAccountId(bankAccount.getId());
     }
 }

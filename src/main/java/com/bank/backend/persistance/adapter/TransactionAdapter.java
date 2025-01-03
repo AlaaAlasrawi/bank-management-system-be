@@ -17,12 +17,12 @@ public class TransactionAdapter implements TransactionRepository {
     private final OutcomeTransactionJpaRepository outcomeTransactionJpaRepository;
 
     @Override
-    public Page<Transaction> getAllTransactions(int page, int size, String sortBy, String sortDirection) {
+    public Page<Transaction> getAllTransactionsByBankAccountId(int page, int size, String sortBy, String sortDirection, Long id) {
         Sort.Direction direction = Sort.Direction.fromString(sortDirection);
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         // Fetch raw results from the database
-        Page<Object[]> rawResults = outcomeTransactionJpaRepository.findAllTransactions(pageable);
+        Page<Object[]> rawResults = outcomeTransactionJpaRepository.findAllTransactions(id,pageable);
 
         // Map raw results to Transaction objects
         List<Transaction> transactions = rawResults.stream()
@@ -40,6 +40,7 @@ public class TransactionAdapter implements TransactionRepository {
                 .description((String) record[1])
                 .transactionDate(convertToLocalDateTime(record[2]))
                 .type((String) record[3])
+                .status((String) record[4])
                 .build();
     }
 

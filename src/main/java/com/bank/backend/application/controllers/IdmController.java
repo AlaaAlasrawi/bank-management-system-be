@@ -10,6 +10,7 @@ import com.bank.backend.domain.model.SysUser;
 import com.bank.backend.domain.services.IdmService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,17 +27,17 @@ public class IdmController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request){
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(registerMapper.modelToResponse(idmService.register(registerMapper.requestToModel(request))));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserAuthenticationResponse> login(@RequestBody UserAuthenticationRequest request){
+    public ResponseEntity<UserAuthenticationResponse> login(@RequestBody UserAuthenticationRequest request) {
         return ResponseEntity.ok(userAuthenticationMapper.modelToResponse(idmService.login(userAuthenticationMapper.requestToModel(request))));
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<SysUser> getUserByUsername(@PathVariable("username") String username){
+    public ResponseEntity<SysUser> getUserByUsername(@PathVariable("username") String username) {
         return ResponseEntity.ok(idmService.getUserByUsername(username));
     }
 
@@ -52,7 +53,24 @@ public class IdmController {
     }
 
     @GetMapping("/validate")
-    public ResponseEntity<Boolean> validateToken(HttpServletRequest request){
+    public ResponseEntity<Boolean> validateToken(HttpServletRequest request) {
         return ResponseEntity.ok(idmService.validateToken(request));
+    }
+
+    @GetMapping("/forget")
+    public ResponseEntity<Void> forgetPassword(@RequestParam String username) throws NoSuchAlgorithmException, InvalidKeyException {
+        idmService.forgetPassword(username);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/verifyOtp")
+    public ResponseEntity<Boolean> verifyOtpForForgetPassword(@RequestParam String otp, @RequestParam String username) throws NoSuchAlgorithmException, InvalidKeyException {
+        return ResponseEntity.ok(idmService.verifyOtp(otp, username));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/update-password")
+    public void updatePassword(@RequestBody UserAuthenticationRequest request) {
+        idmService.updatePassword(request.getUsername(), request.getPassword());
     }
 }

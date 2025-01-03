@@ -28,6 +28,12 @@ public interface CardJpaRepository extends JpaRepository<CardEntity,Long> {
                         @Param("status") CardType cardType,
                         @Param("updatedAt") LocalDateTime updatedAt);
 
-    List<CardEntity> findAllByBankAccount_Id(Long id);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE card c SET c.status = :cardStatus WHERE c.bankAccount.id = :bankAccountId")
+    void updateCardStatusByBankAccountId(@Param("bankAccountId") Long bankAccountId,
+                                         @Param("cardStatus") CardStatus cardStatus);
+
+    List<CardEntity> findAllByBankAccount_Id(Long id);
 }

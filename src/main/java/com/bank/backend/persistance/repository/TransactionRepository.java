@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TransactionRepository {
-    Page<Transaction> getAllTransactions(int page, int size, String sortBy, String sortDirection);
+    Page<Transaction> getAllTransactionsByBankAccountId(int page, int size, String sortBy, String sortDirection, Long id);
 }

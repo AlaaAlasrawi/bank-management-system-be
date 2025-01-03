@@ -25,28 +25,32 @@ public class BankAccountController {
         BankAccount bankAccount = bankAccountMapper.requestToModel(request);
         return ResponseEntity.ok(bankAccountMapper.modelToResponse(bankAccountService.createBankAccount(bankAccount)));
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Boolean> deleteBankAccount(@PathVariable Long id){
         return ResponseEntity.ok(bankAccountService.deleteBankAccount(id));
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity<BankAccount> getBankAccount(@PathVariable Long id){ //bank id
+    public ResponseEntity<BankAccount> getBankAccount(@PathVariable Long id){
         return ResponseEntity.ok(bankAccountService.getBankAccount(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Boolean> updateBankAccountStatus(@PathVariable Long id,@RequestParam AccountStatus status){
-        return  ResponseEntity.ok(bankAccountService.updateBankAccountStatus(id, status));
+    public ResponseEntity<Boolean> updateBankAccountStatus(@PathVariable Long id,@RequestParam("status") String status){
+        AccountStatus accountStatus = AccountStatus.valueOf(status.toUpperCase());
+        return  ResponseEntity.ok(bankAccountService.updateBankAccountStatus(id, accountStatus));
     }
 
     @GetMapping
     public ResponseEntity<BankAccountBalance> getBankAccountsBalance(){
         return ResponseEntity.ok(bankAccountService.getBankAccountsBalance());
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<BankAccount>> getAllBankAccounts(){
+        return  ResponseEntity.ok(bankAccountService.getAllBankAccounts());
+    }
 }
 
-// about the system :
-// primary account => one card DEBIT, one card CREDIT only (on primary account only)
-// saving  account => no cards
 
-// user can have one of each type account (primary, saving)

@@ -20,7 +20,7 @@ public class OutcomeTransactionController {
     @PostMapping
     public ResponseEntity<OutcomeTransactionResponse> createOutcomeTransaction(@RequestBody OutcomeTransactionRequest request) {
         OutcomeTransaction outcomeTransaction = outcomeTransactionMapper.requestToModel(request);
-        return ResponseEntity.ok(outcomeTransactionMapper.modelToResponse(outcomeTransactionService.createOutcomeTransaction(outcomeTransaction)));
+        return ResponseEntity.ok(outcomeTransactionMapper.modelToResponse(outcomeTransactionService.createOutcomeTransaction(outcomeTransaction, request.getIban())));
     }
 
     @PutMapping("/{id}")

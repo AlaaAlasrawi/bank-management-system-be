@@ -20,12 +20,14 @@ public interface BankAccountJpaRepository extends JpaRepository<BankAccountEntit
     @Modifying
     @Transactional
     @Query("UPDATE bank_account b SET b.status = :accountStatus WHERE b.id = :id")
-    void updateAccountStatusById(@Param("id") Long id, @Param("accountStatus") String accountStatus);
+    void updateAccountStatusById(@Param("id") Long id, @Param("accountStatus") AccountStatus accountStatus);
 
 
-    @Query("SELECT CASE WHEN COUNT(ba) > 0 THEN TRUE ELSE FALSE END " +
-            "FROM bank_account ba WHERE ba.accountNumber = :accountNumber AND ba.status = 'ACTIVE'")
-    Boolean isAccountActive(@Param("accountNumber") String accountNumber);
+    @Query("SELECT ba.status " +
+            "FROM bank_account ba " +
+            "WHERE ba.accountNumber = :accountNumber")
+    String accountStatus(@Param("accountNumber") String accountNumber);
+
 
     @Transactional
     @Modifying
@@ -41,4 +43,6 @@ public interface BankAccountJpaRepository extends JpaRepository<BankAccountEntit
 
 
     List<BankAccountEntity> findAllByUser_Id(Long userId);
+
+    Optional<BankAccountEntity> findByIban(String iban);
 }

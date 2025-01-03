@@ -13,6 +13,7 @@ import com.bank.backend.persistance.repository.SysUserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,6 +37,8 @@ public class IdmService {
     private final PasswordEncoder passwordEncoder;
     private final OtpService otpService;
     private final IdentityProvider identityProvider;
+    private final RedisProperties redisProperties;
+    private final MailSenderService mailSenderService;
 
     public SysUser register(SysUser user) {
         validateUserInfo(user);
@@ -43,10 +46,15 @@ public class IdmService {
         fillUpMissingInfo(user);
         return sysUserRepository.save(user);
     }
+
     private void validateUserInfo(SysUser user) {
 
-        if(sysUserRepository.isUsernameAlreadyExists(user.getUsername())) {
+        if (sysUserRepository.isUsernameAlreadyExists(user.getUsername())) {
             throw new DuplicateResourceException("Username already exists");
+        }
+
+        if (sysUserRepository.isEmailAlreadyExists(user.getEmail())) {
+            throw new DuplicateResourceException("email already exists");
         }
     }
 
@@ -61,7 +69,7 @@ public class IdmService {
 
     public UserAuthentication login(UserAuthentication userAuthentication) {
         Authentication authentication = getAuthenticationStatus(userAuthentication);
-        if(authentication.isAuthenticated()) {
+        if (authentication.isAuthenticated()) {
             updateSecurityContextHolder(authentication);
             return buildUserAuthentication(userAuthentication);
         }
@@ -99,6 +107,7 @@ public class IdmService {
         String otp = otpService.generateOtp(user.getUsername());
         // TODO : send otp to email
         log.info("Generated OTP: {}", otp);
+        mailSenderService.sendMail(user.getEmail(), "Login Otp Bankshpere", "your otp is: " + otp);
     }
 
 
@@ -109,5 +118,27 @@ public class IdmService {
     public Boolean validateToken(HttpServletRequest request) {
         UserDetails user = identityProvider.currentIdentityDetails();
         return jwtService.isTokenValid(jwtService.extractToken(request), user);
+    }
+
+
+    public void forgetPassword(String username) throws NoSuchAlgorithmException, InvalidKeyException {
+        SysUser user = new SysUser();
+        try {
+            user = sysUserRepository.findByUsername(username);
+        } catch (Exception e) {
+            return;
+        }
+        String otp = otpService.generateOtp(username);
+        log.info("Generated OTP: {}", otp);
+        mailSenderService.sendMail(user.getEmail(), "Login Otp Bankshpere", "your otp is: " + otp);
+    }
+
+    public Boolean verifyOtp(String otp, String username) throws NoSuchAlgorithmException, InvalidKeyException {
+        return otpService.verifyOtp(otp, username);
+    }
+
+    public void updatePassword(String username, String password) {
+        SysUser user = sysUserRepository.findByUsername(username);
+        sysUserRepository.updatePassword(user.getId(), passwordEncoder.encode(password));
     }
 }

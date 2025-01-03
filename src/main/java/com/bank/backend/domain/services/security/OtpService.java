@@ -19,9 +19,9 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class OtpService {
-    private static final String NO_SECRET_KEY_FOR_OTP = "no_secret_key_for_otp";
-    private static final String INVALID_OR_EXPIRED_OTP = "invalid_or_expired_otp";
-    private static final String VALIDATE_OTP_FIRST = "validate_otp_first";
+    private static final String NO_SECRET_KEY_FOR_OTP = "No secret key for otp";
+    private static final String INVALID_OR_EXPIRED_OTP = "Invalid or expired otp";
+    private static final String VALIDATE_OTP_FIRST = "Validate otp first";
     @Value("${bankdb.otp.length}")
     private int otpLength = 6;
 

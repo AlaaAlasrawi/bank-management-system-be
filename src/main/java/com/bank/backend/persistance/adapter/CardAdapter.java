@@ -48,15 +48,17 @@ public class CardAdapter implements CardRepository {
     }
 
     @Override
-    public List<Card> getAllCards() {
-//        if(cardJpaRepository.findAll().isEmpty()) {
-//            return new ArrayList<>();
-//        }
-        return cardJpaRepository.findAll().stream().map(cardMapper::entityToModel).toList();
+    public List<Card> findByBankAccountId(Long id) {
+        return cardJpaRepository.findAllByBankAccount_Id(id).stream().map(cardMapper::entityToModel).toList();
     }
 
     @Override
-    public List<Card> findByBankAccountId(Long id) {
+    public void updateCardStatusByBankAccountId(Long id, CardStatus cardStatus) {
+        cardJpaRepository.updateCardStatusByBankAccountId(id, cardStatus);
+    }
+
+    @Override
+    public List<Card> getAllCardsByBankAccountId(Long id) {
         return cardJpaRepository.findAllByBankAccount_Id(id).stream().map(cardMapper::entityToModel).toList();
     }
 }

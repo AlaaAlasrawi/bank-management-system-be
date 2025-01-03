@@ -12,4 +12,10 @@ public interface SysUserRepository {
     boolean isUsernameAlreadyExists(String username);
 
     SysUser getProfile(Long id);
+
+    void updateProfile(Long id, SysUser sysUser);
+
+    void updatePassword(Long id, String encode);
+
+    boolean isEmailAlreadyExists(String email);
 }

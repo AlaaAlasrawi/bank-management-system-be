@@ -24,4 +24,6 @@ public interface BankAccountRepository {
     BankAccount getByUserId(Long userId);
 
     List<BankAccount> getAllByUserId(Long userId);
+
+    BankAccount getByIban(String iban);
 }

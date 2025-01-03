@@ -8,6 +8,8 @@ import com.bank.backend.persistance.repository.SysUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+
 @Repository
 @RequiredArgsConstructor
 public class SysUserAdapter implements SysUserRepository {
@@ -37,4 +39,22 @@ public class SysUserAdapter implements SysUserRepository {
                 ()->new RuntimeException("user not found")
         ));
     }
+
+    @Override
+    public void updateProfile(Long id, SysUser sysUser) {
+        sysUser.setUpdatedAt(LocalDateTime.now());
+        sysUserJpaRepository.updateProfileById(id, sysUserMapper.modelToEntity(sysUser));
+    }
+
+    @Override
+    public void updatePassword(Long id, String encode) {
+        sysUserJpaRepository.updatePassword(id, encode);
+    }
+
+    @Override
+    public boolean isEmailAlreadyExists(String email) {
+        return sysUserJpaRepository.existsByEmail(email);
+    }
+
+
 }

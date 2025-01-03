@@ -20,4 +20,6 @@ public class Transaction {
     private LocalDateTime transactionDate;
 
     private String type;
+
+    private String status;
 }

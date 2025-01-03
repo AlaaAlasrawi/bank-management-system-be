@@ -25,5 +25,5 @@ public class OutcomeTransactionRequest {
 
     private String reference;
 
-    private Long bankAccountId;
+    private String iban;
 }

@@ -2,12 +2,15 @@ package com.bank.backend.domain.services;
 
 import com.bank.backend.domain.enums.AccountStatus;
 import com.bank.backend.domain.enums.AccountType;
+import com.bank.backend.domain.enums.CardStatus;
+import com.bank.backend.domain.enums.CardType;
 import com.bank.backend.domain.model.BankAccount;
 import com.bank.backend.domain.model.BankAccountBalance;
 import com.bank.backend.domain.model.SysUser;
 import com.bank.backend.domain.providers.IdentityProvider;
 import com.bank.backend.domain.utils.IbanUtils;
 import com.bank.backend.persistance.repository.BankAccountRepository;
+import com.bank.backend.persistance.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
@@ -23,14 +27,48 @@ public class BankAccountService {
     private final BankAccountRepository bankAccountRepository;
     private final IbanUtils ibanUtils;
     private final IdentityProvider identityProvider;
+    private final CardRepository cardRepository;
 
 
     public BankAccount createBankAccount(BankAccount bankAccount) {
+
+        SysUser user = identityProvider.currentIdentity();
+        List<BankAccount> bankAccounts = bankAccountRepository.getAllByUserId(user.getId());
+
+        AtomicReference<Boolean> primaryAccountFlag = new AtomicReference<>(false);
+        AtomicReference<Boolean> savingAccountFlag = new AtomicReference<>(false);
+        bankAccounts.forEach(b -> {
+            if(b.getAccountType() == AccountType.PRIMARY) {
+                primaryAccountFlag.set(true);
+            }
+            if(b.getAccountType() == AccountType.SAVINGS) {
+                savingAccountFlag.set(true);
+            }
+        });
+        if(savingAccountFlag.get() && primaryAccountFlag.get()) {
+            throw new RuntimeException("you have reach the limit");
+        }
+
+        if(bankAccount.getAccountType() == AccountType.PRIMARY && primaryAccountFlag.get()) {
+            throw new RuntimeException("Primary account already exists");
+        }
+
+        if(bankAccount.getAccountType() ==  AccountType.SAVINGS && savingAccountFlag.get()) {
+            throw new RuntimeException("Saving account already exists");
+        }
+
+        bankAccount.setCountryCode("JO");
+        bankAccount.setBankIdentifier("BKSPHERE");
+        bankAccount.setBranchCode("XXX");
+        bankAccount.setBalance(BigDecimal.ZERO);
+
+        bankAccount.setUserId(user.getId());
         bankAccount.setCreatedAt(LocalDateTime.now());
         bankAccount.setUpdatedAt(LocalDateTime.now());
         bankAccount.setStatus(AccountStatus.ACTIVE);
         bankAccount.setAccountNumber(generateAccountNumber());
         bankAccount.setIban(ibanUtils.generateIban(bankAccount));
+
 
         return bankAccountRepository.createBankAccount(bankAccount);
 
@@ -63,6 +101,11 @@ public class BankAccountService {
     }
 
     public Boolean updateBankAccountStatus(Long id, AccountStatus accountStatus) {
+        BankAccount bankAccount = bankAccountRepository.getById(id);
+
+        if(accountStatus == AccountStatus.FROZEN && bankAccount.getAccountType() ==  AccountType.PRIMARY ) {
+            cardRepository.updateCardStatusByBankAccountId(id, CardStatus.FROZEN);
+        }
         return bankAccountRepository.updateAccountStatusById(id, accountStatus);
     }
 
@@ -86,9 +129,10 @@ public class BankAccountService {
 
         return bankAccountBalance;
     }
+
+    public List<BankAccount> getAllBankAccounts() {
+        return bankAccountRepository.getAllByUserId(identityProvider.currentIdentity().getId());
+    }
 }
-// function that generate bank
-// 1- account number &
-// 2- iban
-// each generated number must be unique
+
 

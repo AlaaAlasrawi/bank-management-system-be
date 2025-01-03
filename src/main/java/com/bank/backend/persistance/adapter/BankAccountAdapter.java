@@ -1,5 +1,6 @@
 package com.bank.backend.persistance.adapter;
 
+import com.bank.backend.application.exception.ResourceNotFoundException;
 import com.bank.backend.domain.enums.AccountStatus;
 import com.bank.backend.domain.mapper.BankAccountMapper;
 import com.bank.backend.domain.model.BankAccount;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Repository
@@ -28,7 +30,7 @@ public class BankAccountAdapter implements BankAccountRepository {
 
     @Override
     public Boolean isAccountActive(String accountNumber) {
-        return bankAccountJpaRepository.isAccountActive(accountNumber);
+        return Objects.equals(bankAccountJpaRepository.accountStatus(accountNumber), "ACTIVE");
     }
 
     @Override
@@ -51,6 +53,13 @@ public class BankAccountAdapter implements BankAccountRepository {
     }
 
     @Override
+    public BankAccount getByIban(String iban) {
+        return bankAccountMapper.entityToModel(bankAccountJpaRepository.findByIban(iban).orElseThrow(
+                ()-> new ResourceNotFoundException("Bank Account not found")
+        ));
+    }
+
+    @Override
     public Boolean deleteById(Long id) {
         if (getById(id) == null) {
             return false;
@@ -61,7 +70,7 @@ public class BankAccountAdapter implements BankAccountRepository {
 
     @Override
     public Boolean updateAccountStatusById(Long id, AccountStatus accountStatus) {
-        bankAccountJpaRepository.updateAccountStatusById(id, accountStatus.name());
+        bankAccountJpaRepository.updateAccountStatusById(id, accountStatus);
         return true;
     }
 

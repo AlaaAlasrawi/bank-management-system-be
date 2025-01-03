@@ -1,9 +1,7 @@
 package com.bank.backend.persistance.repository;
 
 import com.bank.backend.domain.enums.CardStatus;
-import com.bank.backend.domain.model.BankAccount;
 import com.bank.backend.domain.model.Card;
-import com.bank.backend.persistance.entity.CardEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,7 +16,9 @@ public interface CardRepository {
 
     Card updateCardInfo(Long id, Card card);
 
-    List<Card> getAllCards();
-
     List<Card> findByBankAccountId(Long id);
+
+    void updateCardStatusByBankAccountId(Long id, CardStatus cardStatus);
+
+    List<Card> getAllCardsByBankAccountId(Long id);
 }

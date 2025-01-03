@@ -26,28 +26,35 @@ public interface OutcomeTransactionJpaRepository extends JpaRepository<OutcomeTr
 
 
     @Query(value = """
-        SELECT 
-            it.amount AS amount,
-            it.description AS description,
-            it.transaction_date AS transactionDate,
-            'income' AS type
-        FROM income_transaction it
-        UNION ALL
-        SELECT 
-            ot.amount AS amount,
-            ot.description AS description,
-            ot.transaction_date AS transactionDate,
-            'outcome' AS type
-        FROM outcome_transaction ot
-        ORDER BY transactionDate DESC
-        """,
+            SELECT 
+                it.amount AS amount,
+                it.description AS description,
+                it.transaction_date AS transactionDate,
+                'income' AS type,
+               it.status AS status
+            FROM income_transaction it
+            WHERE it.bank_account_id = :bankAccountId
+            UNION ALL
+            SELECT 
+                ot.amount AS amount,
+                ot.description AS description,
+                ot.transaction_date AS transactionDate,
+                'outcome' AS type, 
+                ot.status AS status        
+            FROM outcome_transaction ot
+            WHERE ot.source_bank_account_id = :bankAccountId
+            ORDER BY transactionDate DESC
+            """,
             countQuery = """
         SELECT COUNT(*) FROM (
             SELECT it.id FROM income_transaction it
+            WHERE it.bank_account_id = :bankAccountId
             UNION ALL
             SELECT ot.id FROM outcome_transaction ot
+            WHERE ot.source_bank_account_id = :bankAccountId
         ) AS transactions
         """,
             nativeQuery = true)
-    Page<Object[]> findAllTransactions(Pageable pageable);
+    Page<Object[]> findAllTransactions(@Param("bankAccountId") Long bankAccountId, Pageable pageable);
+
 }
