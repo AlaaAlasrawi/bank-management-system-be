@@ -31,6 +31,10 @@ public class OutcomeTransactionService {
     public OutcomeTransaction createOutcomeTransaction(OutcomeTransaction outcomeTransaction, String iban) {
         SysUser user = identityProvider.currentIdentity();
 
+        if(outcomeTransaction.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+
         BankAccount destinationBankAccount = bankAccountRepository.getByIban(iban);
         outcomeTransaction.setBankAccountId(destinationBankAccount.getId());
         BankAccount sourceBankAccount = bankAccountRepository.getByUserId(user.getId());

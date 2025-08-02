@@ -2,10 +2,6 @@ package com.bank.backend.domain.model;
 
 
 import com.bank.backend.domain.enums.UserStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,9 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SysUser {
-    @Id
-    @Column(name="id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
 
     private String username;

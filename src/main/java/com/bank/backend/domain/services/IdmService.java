@@ -9,6 +9,7 @@ import com.bank.backend.domain.providers.IdentityProvider;
 import com.bank.backend.domain.services.security.JwtService;
 import com.bank.backend.domain.services.security.OtpService;
 import com.bank.backend.domain.services.security.SysUserDetailsService;
+import com.bank.backend.domain.utils.OtpHtmlUtils;
 import com.bank.backend.persistance.repository.SysUserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -107,7 +108,7 @@ public class IdmService {
         String otp = otpService.generateOtp(user.getUsername());
         // TODO : send otp to email
         log.info("Generated OTP: {}", otp);
-        mailSenderService.sendMail(user.getEmail(), "Login Otp Bankshpere", "your otp is: " + otp);
+        mailSenderService.sendHtml(user.getEmail(), "Login Otp Bankshpere", OtpHtmlUtils.generateHtmlResponse(otp));
     }
 
 
@@ -130,7 +131,7 @@ public class IdmService {
         }
         String otp = otpService.generateOtp(username);
         log.info("Generated OTP: {}", otp);
-        mailSenderService.sendMail(user.getEmail(), "Login Otp Bankshpere", "your otp is: " + otp);
+        mailSenderService.sendHtml(user.getEmail(), "Forget Password Otp Bankshpere",OtpHtmlUtils.generateHtmlResponse(otp));
     }
 
     public Boolean verifyOtp(String otp, String username) throws NoSuchAlgorithmException, InvalidKeyException {

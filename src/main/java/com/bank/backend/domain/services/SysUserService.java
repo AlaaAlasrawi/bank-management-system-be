@@ -28,7 +28,7 @@ public class SysUserService {
 
     private void validateUserInfo(SysUser user) {
         if (sysUserRepository.isEmailAlreadyExists(user.getEmail())) {
-            throw new DuplicateResourceException("email already exists");
+            throw new DuplicateResourceException("email address is already exist");
         }
     }
 }
